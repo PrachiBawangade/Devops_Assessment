@@ -34,7 +34,7 @@ Example:
 
 Blue remains running while Green is introduced so that traffic can be rolled back to Blue if required.
 
-Remote Terraform State
+**Remote Terraform State**
 
 Before deploying the main infrastructure, I created the resources required for Terraform remote state:
 
@@ -58,7 +58,7 @@ DynamoDB prevents multiple Terraform operations from modifying state at the same
 
 <img width="1365" height="723" alt="Screenshot 2026-09-14 013053" src="https://github.com/user-attachments/assets/4db7af91-d47e-442b-9612-44ccb3fef9cc" />
 
-AWS Provider and Variables
+**AWS Provider and Variables**
 
 The AWS region was:
 
@@ -84,7 +84,7 @@ green_weight = 0
 
 This allowed me to change traffic using Terraform rather than manually modifying the ALB in the AWS Console.
 
-VPC Creation
+**VPC Creation**
 
 Terraform creates a VPC:
 
@@ -105,7 +105,7 @@ Route Table Associations
 
 The public subnets have a route to the Internet Gateway.
 
-Security Groups
+**Security Groups**
 
 created separate security groups for the ALB and application instances.
 
@@ -124,7 +124,7 @@ The EC2 security group does not allow HTTP from:
 Instead, it allows HTTP only from the ALB security group:
 Therefore users cannot directly access the application instances.
 
-Application Load Balancer
+**Application Load Balancer**
 
 Terraform creates an Application Load Balancer.
 
@@ -137,7 +137,7 @@ forwards requests to target groups
 Initially, Alpha/Blue was the active environment.
 The ALB also provides the DNS endpoint that we used for testing.
 
-Blue Target Group
+**Blue Target Group**
 
 created the first target group for the Alpha application:
 
@@ -151,7 +151,7 @@ and performs health checks against:
 Only healthy instances receive traffic.
 <img width="1353" height="718" alt="Screenshot 2026-09-14 022730" src="https://github.com/user-attachments/assets/be01c969-eb86-41bd-a221-7a8665828327" />
 
-Reusable Application Module
+**Reusable Application Module**
 
 Instead of writing the EC2 infrastructure twice, I created:
 
@@ -169,7 +169,7 @@ The same module is then called twice:
 module "blue"
 module "green"
 
-Launch Template
+**Launch Template**
 
 The application module creates an EC2 Launch Template.
 
@@ -184,7 +184,7 @@ For test environment used:
 AMI: Ubuntu 24.04
 Instance type: t3.micro
 
-User Data — Installing Nginx
+**User Data — Installing Nginx**
 
 When an EC2 instance starts, the user_data.sh script runs automatically.
 
@@ -202,11 +202,12 @@ The resulting page looks like:
 
 alpha-v1.0
 Instance ID: i-xxxxxxxxxxxxxxxxx
+
 <img width="1363" height="614" alt="Screenshot 2026-09-14 033115" src="https://github.com/user-attachments/assets/aeced57d-47cc-41e7-81c4-07c33af7b4b5" />
 
 <img width="1358" height="673" alt="Screenshot 2026-09-14 033739" src="https://github.com/user-attachments/assets/1abd1601-4415-47f3-b86c-2da4eecf8c15" />
 
-Auto Scaling Group
+**Auto Scaling Group**
 
 The module creates an Auto Scaling Group with:
 
@@ -222,10 +223,10 @@ Blue ASG
 
 The instances are automatically registered with the Blue target group.
 The ALB health checks determine whether they are healthy.
+
 <img width="1362" height="717" alt="Screenshot 2026-09-14 035530" src="https://github.com/user-attachments/assets/f4296050-d781-492e-b28b-ee436db0aad2" />
 
-Terraform Validation
-
+terraform Validation
 Before applying the infrastructure, ran:
 
 terraform fmt
@@ -236,7 +237,7 @@ Then:
 
 terraform apply
 
-Alpha / Blue Environment
+**Alpha / Blue Environment**
 
 After Terraform applied successfully, the Alpha environment was running.
 
@@ -261,6 +262,7 @@ I tested the ALB endpoint and confirmed that the application returned:
 
 alpha-v1.0
 along with the EC2 instance ID.
+
 <img width="1357" height="713" alt="Screenshot 2026-09-14 023805" src="https://github.com/user-attachments/assets/9a25fa01-de6f-4e62-9106-a59a9229c45e" />
 
 <img width="1292" height="467" alt="Screenshot 2026-09-14 141750" src="https://github.com/user-attachments/assets/a2da7ce5-57ff-4ce8-a9f1-fdea8741c059" />
@@ -271,7 +273,7 @@ along with the EC2 instance ID.
 
 <img width="1356" height="680" alt="Screenshot 2026-09-14 142053" src="https://github.com/user-attachments/assets/4e8f2281-29cc-4fcc-a663-951663407b55" />
 
-Creating Green Environment
+**Creating Green Environment**
 
 The next requirement was to deploy Beta without disturbing Alpha.
 Instead of creating another copy of the Terraform code, I reused the same application module:
@@ -293,7 +295,7 @@ Target Group
 
 Both environments can therefore run simultaneously.
 
-ALB Weighted Routing
+**ALB Weighted Routing**
 
 Instead of manually changing the target group in the AWS Console, Terraform controls the weights:
 
@@ -347,11 +349,9 @@ The result was:
 Blue responses: 50
 Green responses: 0
 Failed requests: 0
-
 This confirmed that the initial environment was healthy.
-The assessment specifically requires confirmation of 100% Blue before starting the cutover.
 
-Green Health Verification
+**Green Health Verification**
 
 Before sending production/test traffic to Green,confirmed that the Green instances were healthy in the Green target group.
 
@@ -372,7 +372,7 @@ But traffic was still:
 
 Therefore creating Green had no impact on the current Blue traffic.
 
-Canary Deployment — 90/10
+**Canary Deployment — 90/10**
 
 Implemented gradual traffic shifting.
 
@@ -410,7 +410,7 @@ GREEN
 
 with no failed requests during the validation.
 
-Full Cutover — 0/100
+**Full Cutover — 0/100**
 
 After validating the Green environment, I performed the full cutover:
 
@@ -431,7 +431,7 @@ to:
 beta-v2.0
 I then ran the request loop again and confirmed successful responses with no failed requests.
 
-Rollback
+**Rollback**
 
 After the Green deployment, I changed the weights back:
 
@@ -449,7 +449,6 @@ The response changed back to:
 alpha-v1.0
 
 ran the same test loop and confirmed successful Blue responses.
-
 Therefore the deployment was reversible using the same Terraform-controlled ALB weighting mechanism
 
 <img width="1365" height="716" alt="Screenshot 2026-09-14 152927" src="https://github.com/user-attachments/assets/1b78a2de-ebec-44fd-8c61-b1b069304737" />
@@ -457,11 +456,11 @@ Therefore the deployment was reversible using the same Terraform-controlled ALB 
 <img width="1365" height="675" alt="Screenshot 2026-09-14 153120" src="https://github.com/user-attachments/assets/2e6f0d01-b86f-4388-b03c-efd3e2aa8c6e" />
 <img width="1364" height="674" alt="Screenshot 2026-09-14 153133" src="https://github.com/user-attachments/assets/a9e99b22-f89a-477f-a43e-5c4a569f1a81" />
 
-Testing Scripts
+**Testing Scripts**
 
 created two simple scripts.
 
-test-cutover.sh
+**test-cutover.sh**
 This script:
 
 Sends multiple requests to the ALB.
@@ -469,8 +468,11 @@ Checks whether the expected version is returned.
 Counts successful requests.
 Counts failed requests.
 Prints PASS/FAIL.
+<img width="1357" height="687" alt="Screenshot 2026-09-14 193414" src="https://github.com/user-attachments/assets/862ec5df-d73c-4f8a-b47e-eb50cb842780" />
 
-test-canary.sh
+<img width="1360" height="712" alt="Screenshot 2026-09-14 193445" src="https://github.com/user-attachments/assets/9991da4b-fea5-4570-9e75-b787dd06225f" />
+
+**test-canary.sh**
 This script:
 
 Sends multiple requests to the ALB.
@@ -480,9 +482,18 @@ Counts Green responses.
 Counts failed responses.
 
 This gave us evidence that weighted routing was actually sending requests to both versions.
+<img width="1357" height="716" alt="Screenshot 2026-09-14 193511" src="https://github.com/user-attachments/assets/61aee661-7fd0-494f-87aa-4a74b634378b" />
 
-Final Cleanup
+<img width="1365" height="652" alt="Screenshot 2026-09-14 193530" src="https://github.com/user-attachments/assets/af52f061-ce00-4e9c-a237-04d6229be6ba" />
+
+**Final Cleanup**
 
 lastly, destroyed the environment:
 
 terraform destroy
+
+<img width="1364" height="694" alt="Screenshot 2026-09-14 193924" src="https://github.com/user-attachments/assets/578bb8d9-8e7a-49a9-8866-efe264441393" />
+
+<img width="1365" height="717" alt="Screenshot 2026-09-14 194943" src="https://github.com/user-attachments/assets/116903a9-17cf-48f5-b27a-6dec6de9a92a" />
+
+
