@@ -27,10 +27,11 @@ The ALB listener forwards traffic to the Blue or Green target group based on Ter
 
 Example:
 
-100/0  -> 100% Blue, 0% Green
-90/10  -> 90% Blue, 10% Green
-50/50  -> 50% Blue, 50% Green
-0/100  -> 0% Blue, 100% Green
+```text
+100/0  ->  100% Blue, 0% Green
+90/10  ->  90% Blue, 10% Green
+50/50  ->  50% Blue, 50% Green
+0/100  ->  0% Blue, 100% Green
 
 Blue remains running while Green is introduced so that traffic can be rolled back to Blue if required.
 
@@ -149,6 +150,7 @@ HTTP :80
 and performs health checks against:
 /
 Only healthy instances receive traffic.
+
 <img width="1353" height="718" alt="Screenshot 2026-09-14 022730" src="https://github.com/user-attachments/assets/be01c969-eb86-41bd-a221-7a8665828327" />
 
 **Reusable Application Module**
@@ -241,17 +243,25 @@ terraform apply
 
 After Terraform applied successfully, the Alpha environment was running.
 
-The traffic flow was:
+Traffic Flow
 
+The traffic flow for the Alpha environment was:
+
+```text
 Internet
    |
+   v
   ALB
    |
+   v
 Blue Target Group
    |
-   +---- EC2
+   +---- EC2 Instance (AZ-1)
    |
-   +---- EC2
+   +---- EC2 Instance (AZ-2)
+```
+
+The ALB receives requests from the internet and forwards them to the Blue target group. The target group distributes traffic across the two EC2 instances.
 
 Traffic configuration:
 
@@ -380,6 +390,9 @@ First:
 
 Blue  = 90%
 Green = 10%
+<img width="1352" height="679" alt="Screenshot 2026-09-14 150451" src="https://github.com/user-attachments/assets/ad9ac96a-fbaf-496a-9b3c-787ae60bfeaf" />
+
+<img width="1365" height="694" alt="Screenshot 2026-09-14 150404" src="https://github.com/user-attachments/assets/ab14b1eb-61c6-44fb-b2c4-e3d7eb212263" />
 
 Then I ran the test loop against the ALB.
 
@@ -390,24 +403,24 @@ beta-v2.0  → GREEN
 
 This allowed me to verify that traffic was reaching both environments.
 
-Canary Deployment — 50/50
+
+**Canary Deployment — 50/50**
 
 Next, I changed the Terraform variables:
 
 Blue  = 50%
 Green = 50%
-
 and applied Terraform.
+<img width="1349" height="705" alt="Screenshot 2026-09-14 150859" src="https://github.com/user-attachments/assets/6fcea9b5-746d-4202-a55d-b1f2362da0ae" />
+<img width="1365" height="694" alt="Screenshot 2026-09-14 151045" src="https://github.com/user-attachments/assets/c92b78f6-8187-4ffd-9e83-65f63725678a" />
 
 Then I ran the same testing loop again.
-
 The output showed responses from both:
 
 BLUE
 GREEN
 BLUE
 GREEN
-
 with no failed requests during the validation.
 
 **Full Cutover — 0/100**
@@ -416,6 +429,8 @@ After validating the Green environment, I performed the full cutover:
 
 Blue  = 0%
 Green = 100%
+<img width="1365" height="712" alt="Screenshot 2026-09-14 151602" src="https://github.com/user-attachments/assets/b5e30fa2-661b-44eb-802e-12e825fe3d87" />
+<img width="1365" height="719" alt="Screenshot 2026-09-14 151834" src="https://github.com/user-attachments/assets/74f1ad9a-79c1-4097-b547-dfcf1c11455a" />
 
 changed the Terraform variables and ran:
 
@@ -429,7 +444,12 @@ alpha-v1.0
 to:
 
 beta-v2.0
-I then ran the request loop again and confirmed successful responses with no failed requests.
+<img width="1365" height="683" alt="Screenshot 2026-09-14 152501" src="https://github.com/user-attachments/assets/1c6ddc3f-b3ca-4b32-9e9e-9aceb4dca937" />
+<img width="1360" height="629" alt="Screenshot 2026-09-14 152517" src="https://github.com/user-attachments/assets/18bbb7ac-2e55-4963-a3a8-15016689ec33" />
+
+then ran the request loop again and confirmed successful responses with no failed requests.
+<img width="1365" height="710" alt="Screenshot 2026-09-14 151955" src="https://github.com/user-attachments/assets/5567e322-89cf-4989-8cd9-9978ff150db7" />
+
 
 **Rollback**
 
