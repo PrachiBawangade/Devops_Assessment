@@ -517,3 +517,9 @@ terraform destroy
 <img width="1365" height="717" alt="Screenshot 2026-09-14 194943" src="https://github.com/user-attachments/assets/116903a9-17cf-48f5-b27a-6dec6de9a92a" />
 
 
+<img width="1365" height="603" alt="Screenshot 2026-09-14 205325" src="https://github.com/user-attachments/assets/b4fc1c1d-6295-4b05-b105-a7ad526fb2e5" />
+<img width="1357" height="655" alt="Screenshot 2026-09-14 205400" src="https://github.com/user-attachments/assets/466bd04f-2497-4f29-abc1-c6508c151ce3" />
+<img width="1362" height="666" alt="Screenshot 2026-09-14 205415" src="https://github.com/user-attachments/assets/2729af47-9dbf-4c73-bf38-658e5405ab12" />
+<img width="1363" height="678" alt="Screenshot 2026-09-14 205455" src="https://github.com/user-attachments/assets/874fe674-c29f-4156-b1f2-670cf2ff8a53" />
+<img width="1365" height="654" alt="Screenshot 2026-09-14 205548" src="https://github.com/user-attachments/assets/124e765a-43d0-4d16-9cdf-40b1f8fa85af" />
+
