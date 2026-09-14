@@ -32,7 +32,7 @@ Example:
 90/10  ->  90% Blue, 10% Green
 50/50  ->  50% Blue, 50% Green
 0/100  ->  0% Blue, 100% Green
-
+```
 Blue remains running while Green is introduced so that traffic can be rolled back to Blue if required.
 
 **Remote Terraform State**
