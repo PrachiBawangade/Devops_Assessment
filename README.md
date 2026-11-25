@@ -1,4 +1,4 @@
-# ZentrumHub DevOps Assessment
+# DevOps Assessment
 
 This project implements the Alpha test environment and a Blue-Green deployment for the ZentrumHub DevOps assessment.
 
